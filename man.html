@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello</title>
+</head>
+<style type="number/css">
+    body {
+        overflow: scroll;
+    }
+</style>
+<body id="mainbody">
+    <canvas id="main"></canvas>
+    <br>
+    <label for="iterations">Iterations (more-better)</label>
+    <input type="number" id="iterations" name="iterations">
+    <button onclick="divide_iterations()">1/2</button>
+    <button onclick="multiply_iterations()">x2</button>
+    <br>
+    <label for="resolution">Resolution (px)</label>
+    <input type="number" id="resolution" name="resolution">
+    <button onclick="divide_resolution()">1/2</button>
+    <button onclick="multiply_resolution()">x2</button>
+    <br>
+    <label for="x">Top left corner x coordinate</label>
+    <input id="x" type="number" name="x">
+    <button onclick="move_left()"><</button>
+    <button onclick="move_right()">></button>
+    <br>
+    <label for="y">Top left corner y coordinate</label>
+    <input id="y" type="number" name="y">
+    <button onclick="move_up()">^</button>
+    <button onclick="move_down()">v</button>
+    <br>
+    <label for="side_length">Square length</label>
+    <input id="side_length" type="number" name="side_length">
+    <button onclick="zoom_out()">zoom -</button>
+    <button onclick="zoom_in()">zoom +</button>
+    <br>
+    <button onclick="fill_in_parameters_mandelbrot()">Click me!</button>
+</body>
+<script type="text/javascript">
+    var SIZE = 512;
+    
+</script>
+<script type="text/javascript" src="man.js"></script>
+<script type="text/javascript">
+
+    var canvas = document.getElementById("main");
+    canvas.addEventListener("click", zoom_by_clicking);
+
+    canvas.height = SIZE;
+    canvas.width = SIZE;
+
+    var ctx = canvas.getContext("2d");
+    var id = ctx.createImageData(SIZE, SIZE);
+    var data = id.data;
+
+    var i = 0;
+    var jitter = 50;
+    var half_life = 20;
+
+    var rules = [
+        function(row, col) {return row;},
+        function(row, col) {return col;},
+        function(row, col) {return row ^ col;},
+        function(row, col) {return row & col;},
+        function(row, col) {return row | col;},
+        function(row, col) {return row % col;},
+        function(row, col) {return row + col;},
+        function(row, col) {return row - col;},
+        function(row, col) {return row * col;},
+        function(row, col) {return row * row + col*col;},
+        // function(row, col) {return (row-col)*(row+col);},
+        function(row, col) {return (3*row+5*col);},
+        function(row, col) {return (1/(row+col)*(SIZE+SIZE));},
+        function(row, col) {return ((row % Math.floor(4*((row+col)/(SIZE*2/10))) < Math.floor(3*((row+col)/(SIZE*2/10)))) && (col % Math.floor(4*((row+col)/(SIZE*2/10))) < Math.floor(3*((row+col)/(SIZE*2/10))))) * 255 ;},
+    ];
+    const rule1 = Math.floor(Math.random() * rules.length);
+    const rule2 = Math.floor(Math.random() * rules.length);
+
+    // rules.push(function(row, col) {
+    //     if ((row+col)*5 < row*col) {
+    //         return rules[rule1];
+    //     } else {
+    //         return rules[rule2];
+    //     }
+    // });
+
+    xrule = Math.floor(Math.random() * rules.length);
+    // xrule = rules.length-1;
+    const yrule = Math.floor(Math.random() * rules.length);
+    const zrule = Math.floor(Math.random() * rules.length);
+
+    function step(ts) {
+        window.requestAnimationFrame(step);
+        for (row = 0; row < SIZE; row++) {
+            for (col = 0; col < SIZE; col++) {
+                idx = (row * SIZE + col)*4;
+                r = rules[xrule](row,col);
+                // r = 1/(row*col)*SIZE*SIZE*255;
+                // g = (row-col);
+                g = rules[yrule](row,col);
+                b = rules[zrule](row,col);
+                jitter = 50/((i+1)/half_life);
+                if (jitter < 5) {
+                    jitter = 0;
+                }
+                r += Math.floor(Math.random()*jitter - jitter/2);
+                g += Math.floor(Math.random()*jitter - jitter/2);
+                b += Math.floor(Math.random()*jitter - jitter/2);
+
+                r = r % 256;
+                g = g % 256;
+                b = b % 256;
+
+                data[idx+0] = r;
+                data[idx+1] = g;
+                data[idx+2] = b;
+                data[idx+3] = 255;
+            }
+        }
+        ctx.putImageData(id, 0, 0);
+        i += 1;
+    }
+    take_it_away_mandelbrot();
+    // step(0);
+</script>

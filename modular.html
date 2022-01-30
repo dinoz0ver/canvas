@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modular arithmetic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id="container">
+    <div id="subcontainer">
+      <canvas id="main_canvas"></canvas>
+      <div id="controls">
+        <label for="n_points">Number of points</label>
+        <input type="number" name="n_points" id="n_points">
+        <label for="mult">Multiplier</label>
+        <input type="number" name="mult" id="mult">
+        <label for="step_size">Step size</label>
+        <input type="number" name="step_size" id="step_size">
+        <div id="buttons">
+          <button id="pause">Pause</button>
+          <button id="resume">Resume</button>
+        </div>
+        <div id="buttons2">
+          <button id="step_back">Step back</button>
+          <button id="calculate">Calculate</button>
+          <button id="step_forward">Step forward</button>
+        </div>
+        <div id="color_picking">
+          <canvas id="picker"></canvas>
+          <br>
+          <input id="color" value="#54aedb">
+        </div>
+      </div>
+    </div>
+    <div id="landmarks">
+      <div class="landmark-item">
+        <img src="images_small/211_3.png" class="landmark" onclick="set_parameters(211,3,'#54aedb')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_21.png" class="landmark" onclick="set_parameters(200,21,'#5359db')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_29.png" class="landmark" onclick="set_parameters(200,29,'#00cdb5')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_33.png" class="landmark" onclick="set_parameters(200,33,'#c100cd')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_34.png" class="landmark" onclick="set_parameters(200,34,'#fdaf40')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_49.png" class="landmark" onclick="set_parameters(200,49,'#cd0014')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_51.png" class="landmark" onclick="set_parameters(200,51,'#00a007')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_66.png" class="landmark" onclick="set_parameters(200,66,'#00ff29')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_67.png" class="landmark" onclick="set_parameters(200,67,'#44ff00')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_73.png" class="landmark" onclick="set_parameters(200,73,'#667af9')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_76.png" class="landmark" onclick="set_parameters(200,76,'#f966cf')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_80.png" class="landmark" onclick="set_parameters(200,80,'#ff695a')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_81.png" class="landmark" onclick="set_parameters(200,81,'#e3de2f')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_86.png" class="landmark" onclick="set_parameters(200,86,'#f550e5')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_99.png" class="landmark" onclick="set_parameters(200,99,'#ff0026')">
+      </div>
+      <div class="landmark-item">
+        <img src="images_small/200_102.png" class="landmark" onclick="set_parameters(200,102,'#ff00fa')">
+      </div>
+    </div>
+  </div>
+</body>
+<style type="text/css">
+  #container {
+    display: flex;
+    flex-direction: column;
+  }
+  #subcontainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+  }
+  #landmarks {
+    padding: 20px;
+  /*
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;*/
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    /*grid-auto-rows: 150px;*/
+    grid-column-gap: 1em;
+    grid-row-gap: 1em;
+    align-items: center;
+    /*justify-content: space-around;*/
+    border: 5px dashed #dddddd;
+    /*height: 700px;*/
+    /*width: 300px;*/
+  }
+  .landmark-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*border: 2px solid black;*/
+  }
+  .landmark {
+    width: 100px;
+    height: 100px;
+    /*margin-right: 20px;*/
+  }
+  .landmark:hover {
+    cursor: pointer;
+    /*margin-right: 20px;*/
+  }
+  #buttons {
+    display: flex;
+    flex-direction: row;
+  }
+  #buttons2 {
+    display: flex;
+    flex-direction: row;
+  }
+  #main_canvas {
+    display: inline-block;
+    margin-right: 50px;
+  }
+  #controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 450px;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    /*height: 100vh;*/
+    align-items: center;
+  }
+</style>
+<script src="html5kellycolorpicker.min.js"></script>
+<script type="text/javascript">
+
+  function fill_in_parameters_from_code(n_points, mult, step_size, stroke_style) {
+    el = document.getElementById("n_points");
+    el.value = `${n_points}`;
+    console.log(`n_points el value ${n_points}`)
+    el = document.getElementById("mult");
+    el.value = `${mult}`;
+    console.log(`mult el value ${mult}`)
+    el = document.getElementById("step_size");
+    el.value = `${step_size}`;
+    console.log(`step_size el value ${step_size}`)
+    kelly_color_picker.setColor(stroke_style);
+    console.log(`curr color ${stroke_style}`)
+  }
+
+  function init_circle(canvas) {
+    radius = window.innerHeight/2;
+
+    canvas.width = window.innerHeight+32;
+    canvas.height = window.innerHeight+32;
+
+    center_x = canvas.width/2;
+    center_y = canvas.width/2;
+
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ctx.fillStyle = "red";
+    // ctx.strokeStyle = "red";
+    // ctx.lineWidth = 5;
+
+    // ctx.beginPath();
+    // ctx.arc(center_x,center_y,radius,0,Math.PI*2, false);
+    // ctx.stroke();
+
+    function pointy_circle(n_points) {
+      function where_is_the_point(i,rad=radius) {
+        radians = 2*Math.PI*i/n_points;
+        var x = center_x + rad * Math.cos(-radians);
+        var y = center_y + rad * Math.sin(-radians);
+        return [x,y];
+      }
+
+      function draw_point(i,label) {
+        xy = where_is_the_point(i);
+
+        ctx.fillStyle = "red";
+
+        const point_size = 4;
+        ctx.beginPath();
+        ctx.arc(xy[0], xy[1], point_size, 0, 2*Math.PI);
+        ctx.fill();
+
+        // const font_size = 12+'px';
+        // ctx.font = font_size;
+
+        // xy_p = where_is_the_point(i,radius+20);
+        // ctx.fillText(label,xy_p[0],xy_p[1]);
+      }
+
+      function draw_line_from_to(i,j,stroke_style) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = stroke_style;
+
+        xy_i = where_is_the_point(i);
+        xy_j = where_is_the_point(j);
+
+        ctx.moveTo(xy_i[0],xy_i[1]);
+        ctx.lineTo(xy_j[0],xy_j[1]);
+        ctx.stroke();
+      }
+
+      for (i = 0; i < n_points; i++) {
+        draw_point(i,`${i}`);
+      }
+
+      return draw_line_from_to;
+    }
+
+    return pointy_circle;
+  }
+
+  var color_input = document.getElementById("color");
+  var canvas = document.getElementById('main_canvas');
+  var kelly_color_picker = new KellyColorPicker({place : 'picker', input : 'color', size : 150});
+  var ctx = canvas.getContext("2d");
+  var n_points = 211;
+  var mult = 3;
+  var is_paused = true;
+  var step_direction = 0;
+  var step_size = 0.01;
+  var stroke_style = "#54aedb";
+
+  function pause_game() {
+    is_paused = true;
+  }
+  function resume_game() {
+    is_paused = false;
+    fill_in_parameters_from_input();
+    step();
+  }
+  function step_forward() {
+    is_paused = true;
+    step_direction = 1;
+    fill_in_parameters_from_input();
+    step();
+  }
+  function step_back() {
+    is_paused = true;
+    step_direction = -1;
+    fill_in_parameters_from_input();
+    step();
+  }
+  function calculate() {
+    is_paused = true;
+    step_direction = 0;
+    fill_in_parameters_from_input();
+    step();
+  }
+
+  function set_parameters(np,m,clr) {
+    n_points = np;
+    mult = m;
+    stroke_style = clr;
+    fill_in_parameters_from_code(n_points,mult,step_size,stroke_style);
+    calculate();
+  }
+
+  document.getElementById("pause").onclick = pause_game;
+  document.getElementById("resume").onclick = resume_game;
+
+  document.getElementById("step_back").onclick = step_back;
+  document.getElementById("calculate").onclick = calculate;
+  document.getElementById("step_forward").onclick = step_forward;
+
+  function fill_in_parameters_from_input() {
+    el = document.getElementById("n_points");
+    n_points = parseInt(el.value);
+    el = document.getElementById("mult");
+    mult = parseFloat(el.value);
+    el = document.getElementById("step_size");
+    step_size = parseFloat(el.value);
+    // el = document.getElementById("color");
+    stroke_style = kelly_color_picker.getCurColorHex();
+  }
+
+  fill_in_parameters_from_code(n_points,mult,step_size,stroke_style);
+
+  function step() {
+    
+    for (; mult < 200;) {
+
+      // console.log(`step with n_points ${n_points}`);
+
+      pointy = init_circle(canvas);
+      liny = pointy(n_points);
+      // liny(0,2);
+      for (i = 0; i < n_points; i++) {
+        liny(i,i*mult,stroke_style);
+      }
+
+      if (step_direction != 0) {
+        mult += step_size * step_direction;
+        step_direction = 0;
+        fill_in_parameters_from_code(n_points,mult,step_size,stroke_style);
+        step();
+      } else if (!is_paused) {
+        mult += step_size;
+        fill_in_parameters_from_code(n_points,mult,step_size,stroke_style);
+        window.requestAnimationFrame(step);
+      }
+
+      break;
+    }
+  }
+
+  step();
+
+  var prev_stroke_style = stroke_style;
+  setInterval(() => {
+    el = document.getElementById("color");
+    stroke_style = el.value;
+    if (stroke_style != prev_stroke_style) {
+      prev_stroke_style = stroke_style;
+      calculate();
+    }
+  }, 10);
+
+</script>
+</html>

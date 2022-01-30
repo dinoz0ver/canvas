@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canvas</title>
+  <meta name="viewport" content="width=device-width initial-scale=0.5, maximum-scale=1">
+</head>
+    <style>
+      html, body {
+        overflow: hidden;
+      }
+      body {
+        width: 100%;
+        height: 100vh;
+        background: black;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+      }
+      /*canvas {
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
+      }*/
+      canvas {
+        display: block;
+        /*margin: 0 auto;*/
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      @media all and (device-width: 768px) and (device-height: 1024px) and (orientation:portrait) {
+      }
+      @media all and (device-width: 1024px) and (device-height: 768px) and (orientation:landscape) {
+      }
+    </style>
+
+  <body onresize="resizeCanvas(false)">
+    <canvas id="main">
+    </canvas>
+  </body>
+
+  <script type="text/javascript">
+
+      var FULLSCREEN;
+      var WIDTH;
+      var HEIGHT;
+      var SIZE;
+      var MULTIPLIER;
+      var SIZE;
+      var WIDTH;
+      var HEIGHT;
+      var MULTIPLIER;
+
+      var canvas;
+      var IMAGEDATA;
+      var EMPTY;
+
+      FULLSCREEN = false;
+
+      function switchToFullscreen() {
+        if (FULLSCREEN == true) {
+          return;
+        }
+        FULLSCREEN = true;
+        resizeCanvas(false);
+      }
+      function switchToFit() {
+        if (FULLSCREEN == false) {
+          return;
+        }
+        FULLSCREEN = false;
+        resizeCanvas(false);
+      }
+
+      function resizeCanvas(initial) {
+
+        let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        let height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+        if (FULLSCREEN) {
+          WIDTH = width;
+          HEIGHT  = height;
+          SIZE = WIDTH;
+          MULTIPLIER = 1;
+        } else {
+          SIZE  = 512;
+          WIDTH = SIZE;
+          HEIGHT = SIZE;
+          MULTIPLIER = 2;
+        }
+
+        canvas = document.getElementById('main');
+        canvas.setAttribute("width", `${WIDTH}`);
+        canvas.setAttribute("height", `${HEIGHT}`);
+        canvas.style.width = `${WIDTH*MULTIPLIER}px`;
+        canvas.style.height = `${HEIGHT*MULTIPLIER}px`;
+
+
+        canvas = document.getElementById("main");
+
+        let ctx = canvas.getContext("2d");
+        IMAGEDATA = ctx.createImageData(WIDTH, HEIGHT);
+        EMPTY = ctx.createImageData(WIDTH, HEIGHT);
+
+        if (!initial && resizeFunc !== undefined) {
+          resizeFunc();
+          emitRedraw();
+        }
+
+        console.log(`canvas width ${WIDTH}`);
+        console.log(`canvas height ${HEIGHT}`);
+        console.log(`document.body.clientWidth ${document.body.clientWidth}`);
+        console.log(`document.body.clientHeight ${document.body.clientHeight}`);
+        console.log(`window.innerWidth ${window.innerWidth}`);
+        console.log(`window.innerHeight ${window.innerHeight}`);
+        console.log(`window.screen.width ${window.screen.width}`);
+        console.log(`window.screen.height ${window.screen.height}`);
+        console.log(`----------`);
+        console.log(`WIDTH ${WIDTH}`);
+        console.log(`HEIGHT ${HEIGHT}`);
+        console.log(`SIZE ${SIZE}`);
+        console.log(`FULLSCREEN ${FULLSCREEN}`);
+        console.log(`CSS WIDTH ${WIDTH*MULTIPLIER}`);
+        console.log(`CSS HEIGHT ${HEIGHT*MULTIPLIER}`);
+        console.log(`MULTIPLIER ${MULTIPLIER}`);
+      }
+
+      resizeCanvas(true);
+      clearScreen();
+      
+      function clearScreen() {
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle = `rgb(0,0,0)`;
+        ctx.fillRect(  0, 0, WIDTH, HEIGHT );
+      }
+
+      function clrScr() {
+        IMAGEDATA.data.set(EMPTY.data);
+      }
+
+      function emitRedraw() {
+          let event = new Event('redraw');
+          document.dispatchEvent(event);
+      }
+
+      // function draw_pixel(data, row, col, ar) {
+      //   let r = ((ar[0] % 256)+256)%256;
+      //   let g = ((ar[1] % 256)+256)%256;
+      //   let b = ((ar[2] % 256)+256)%256;
+      //   let idx = (row*WIDTH+col)*4;
+      //   data[idx+0] = r;
+      //   data[idx+1] = g;
+      //   data[idx+2] = b;
+      //   data[idx+3] = 255;
+      // }
+
+      function draw_pixel(data, row, col, ar) {
+        if (row < 0 || row >= HEIGHT || col < 0 || col >= WIDTH) {
+          return;
+        }
+        let r = ar[0];
+        let g = ar[1];
+        let b = ar[2];
+        let idx = (row*WIDTH+col)*4;
+        data[idx+0] = r;
+        data[idx+1] = g;
+        data[idx+2] = b;
+        data[idx+3] = 255;
+      }
+</script>
+<!-- <script type="text/javascript" src="tracer.js"></script> -->
+<script type="text/javascript" src="draw.js"></script>
+<script type="text/javascript">
+
+    let ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+
+
+    var isPaused = false;
+
+    let step = 0;
+
+    var what_to_draw = 0;
+
+
+    step_forward_yourself = function() {
+      if (modes[drawing_mode] != "animate_it_yourself") {
+        window.requestAnimationFrame(decider);
+        return;
+      }
+      animate_it_yourself[what_to_draw%animate_it_yourself.length](IMAGEDATA.data, step);
+
+      if (!isPaused) {
+        window.requestAnimationFrame(step_forward_yourself);
+      }
+      ctx.putImageData(IMAGEDATA, 0, 0);
+      step++;
+    }
+
+
+    step_forward = function() {
+      if (modes[drawing_mode] != "animate") {
+        window.requestAnimationFrame(decider);
+        return;
+      }
+      for (let row = 0; row < HEIGHT; row++) {
+        for (let col = 0; col < WIDTH; col++) {
+          let ar = animate[what_to_draw%animate.length](row, col, step);
+          draw_pixel(IMAGEDATA.data, row, col, ar);
+        }
+      }
+      if (!isPaused) {
+        window.requestAnimationFrame(step_forward);
+      }
+      ctx.putImageData(IMAGEDATA, 0, 0);
+      step++;
+    }
+
+    draw_static = function() {
+
+      if (modes[drawing_mode] != "static") {
+        window.requestAnimationFrame(decider);
+        return;
+      }
+
+      for (let row = 0; row < HEIGHT; row++) {
+        for (let col = 0; col < WIDTH; col++) {
+          let ar = static[what_to_draw%static.length](row, col);
+          draw_pixel(IMAGEDATA.data, row, col, ar);
+        }
+      }
+      ctx.putImageData(IMAGEDATA, 0, 0);
+
+    }
+
+    draw_yourself = function() {
+
+      if (modes[drawing_mode] != "draw_it_yourself") {
+        window.requestAnimationFrame(decider);
+        return;
+      }
+      draw_it_yourself[what_to_draw%draw_it_yourself.length](IMAGEDATA.data);
+      ctx.putImageData(IMAGEDATA, 0, 0);
+    }
+
+    let funcs = {
+      "animate": step_forward,
+      "animate_it_yourself": step_forward_yourself,
+      "static": draw_static,
+      "draw_it_yourself": draw_yourself
+    };
+
+    document.addEventListener("redraw", function(){
+      clrScr(IMAGEDATA.data);
+      funcs[modes[drawing_mode]]();
+    });
+
+    function decider() {
+      if (modes[drawing_mode] == "animate") {
+        step_forward();
+
+      } else if (modes[drawing_mode] == "static") {
+        draw_static();
+
+      } else if (modes[drawing_mode] == "draw_it_yourself") {
+        draw_yourself();
+
+      } else if (modes[drawing_mode] == "animate_it_yourself") {
+        step_forward_yourself();
+
+      }
+    }
+
+    decider();
+
+      document.addEventListener('keydown', playPause);
+      document.addEventListener('click', doubleTap);
+
+      function goFullscreen() {
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          console.log("requesting fullscreen");
+          canvas.requestFullscreen();
+        }
+      }
+
+      function onDoubleClick(e) {
+        console.log("doubletap!");
+        goFullscreen();
+      }
+
+      var tapped=false
+      function doubleTap(e){
+          if(!tapped){ //if tap is not set, set up single tap
+            console.log("first tap");
+            tapped=setTimeout(function(){
+                console.log("no second tap detected");
+                tapped=null
+
+                let event;
+                if (!isPaused) {
+                  event = new KeyboardEvent("keydown", {
+                    key: "Space",
+                    code: "Space"
+                  });
+                } else {
+                  event = new KeyboardEvent("keydown", {
+                    key: "Enter",
+                    code: "Enter"
+                  });
+                }
+                document.dispatchEvent(event);
+
+            },300);   //wait 300ms then run single click code
+          } else {    //tapped within 300ms of last tap. double tap
+            console.log("second tap");
+            clearTimeout(tapped); //stop single tap callback
+            tapped=null
+            goFullscreen();
+          }
+          e.preventDefault();
+      }
+
+      function onClick(e) {
+        console.log("click event");
+
+        event = new KeyboardEvent("keydown", {
+          key: "Enter",
+          code: "Enter"
+        });
+
+        document.dispatchEvent(event);
+      }
+
+      function playPause(e) {
+        console.log(`keydown event: ${e}, code ${e.code}`);
+        if (e.code == "KeyN") {
+          what_to_draw++;
+          step = 0;
+          emitRedraw();
+        }
+        if (e.code == "KeyP") {
+          what_to_draw--;
+          step = 0;
+          emitRedraw();
+        }
+        if (e.code == "KeyM") {
+          drawing_mode = (drawing_mode+1) % modes.length;
+          step = 0;
+          emitRedraw();
+        }
+        if (e.code == "KeyF") {
+          if (FULLSCREEN) {
+            switchToFit();
+          } else {
+            switchToFullscreen();
+          }
+          emitRedraw();
+        }
+        if (e.code != "Enter" && e.code != "Space") {
+          return;
+        }
+        if (isPaused) {
+          if (e.code == "Enter") {
+            isPaused = false;
+          }
+          window.requestAnimationFrame(funcs[modes[drawing_mode]]);
+        } else {
+          isPaused = true;
+        }
+      }
+
+    // window.requestAnimationFrame(step);
+</script>
+</html>
