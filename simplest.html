@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canvas</title>
+  <meta charset="utf-8">
+</head>
+<link rel="stylesheet" type="text/css" href="https://opfm.me/private/canvas/simplest1.css">
+  <body>
+    <canvas id="main">
+    </canvas>
+  </body>
+  <script type="text/javascript" src="https://opfm.me/private/canvas/simplest1.js"></script>
+  <script type="text/javascript">
+
+    function set_style(color) {
+      CANVAS_CTX.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+    }
+
+    function clear_screen(color) {
+      set_style(color);
+      CANVAS_CTX.fillRect(0, 0, WIDTH, HEIGHT );
+    }
+
+    function draw_pixel(row, col, color) {
+      set_style(color);
+      CANVAS_CTX.fillRect(row, col, 1, 1 );
+    }
+  </script>
+
+  <script type="text/javascript">
+    
+    // <<< your code goes here >>>
+
+    console.log("Hello, world!");
+    console.log(`Canvas width is ${WIDTH}`)
+    console.log(`Canvas height is ${HEIGHT}`)
+
+    let white = [255,255,255];
+    let black = [0,0,0];
+    clear_screen(black);
+
+    let center_column = div(WIDTH, 3)
+    let center_row = div(HEIGHT, 3)
+
+    // for (let a=255; a>0;a-=32) {
+    //   red = [a, 0, 0]
+    // }
+
+    // a=0
+    // b=31
+    let n=0
+    let m=31
+    let a=255
+
+    for (let y=0;y<8;y++) {
+      red = [a-=32, 0, 0]
+      for (let v=n;v<m+1; v++) {
+        draw_pixel(v,n,red)
+        draw_pixel(v,m,red)
+
+        draw_pixel(n,v,red)
+        draw_pixel(m,v,red)
+      }
+      n+=2
+      m-=2
+    }
+
+    // for (i=0;i<32;i++) {
+    //   draw_pixel(i,a,red)
+    //   draw_pixel(i,b,red)
+    //   for (x=2;x<30;x++) {
+    //     draw_pixel(x,a+2,red)
+    //     draw_pixel(x,b-2,red)
+    //   }
+    // }
+
+    // for (i=0;i<32;i++) {
+    //   draw_pixel(0,i,red)
+    //   draw_pixel(31,i,red)
+    //   for (x=2;x<30;x++) {
+    //     draw_pixel(a+2,x,red)
+    //     draw_pixel(b-2,x,red)
+    //   }
+    // }
+
+    // draw_pixel(center_row, center_column, red);
+
+  </script>
+
+</html>
