@@ -14,6 +14,35 @@
   <script type="text/javascript" src="diana.js"></script>
   <script type="text/javascript">
 
+    // function clear_screen(color) {
+    //   for (let row = 0; row < HEIGHT; row++) {
+    //     for (let col = 0; col < WIDTH; col++) {
+    //       draw_pixel(row, col, color);
+    //     }
+    //   }
+    // }
+
+    // function draw_pixel(row, col, color) {
+    //   if (color.length == 4 && color[3] == 0) {
+    //     return;
+    //   }
+    //   if (row < 0 || row >= HEIGHT || col < 0 || col >= WIDTH) {
+    //     return;
+    //   }
+    //   let r = color[0];
+    //   let g = color[1];
+    //   let b = color[2];
+    //   let idx = (row*WIDTH+col)*4;
+    //   IMAGEDATA.data[idx+0] = r;
+    //   IMAGEDATA.data[idx+1] = g;
+    //   IMAGEDATA.data[idx+2] = b;
+    //   IMAGEDATA.data[idx+3] = 255;
+    // }
+
+    // function render() {
+    //   CANVAS_CTX.putImageData(IMAGEDATA, 0, 0);
+    // }
+
     function set_style(color) {
       CANVAS_CTX.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
     }
@@ -61,50 +90,105 @@
 
 
     let color=[0,0,0,0]
-    let i=0
 
     await start_recording()
 
-    for (let a=0;a<256;a++) {
-      for (let b=0; b<256; b++) {
-        color=DIANA_IMAGE[i];
-        draw_pixel(a,b,color)
-        i+=1
-      }
-    }
+    function draw_with_offset(red_offset, green_offset, blue_offset) {
+      let i=0
 
-    i = 0;
+      for (let a=0;a<256;a++) {
+        for (let b=0; b<256; b++) {
+          color=DIANA_IMAGE[i];
+          // tmp = color[0];
+          // color[0] = color[1];
+          // color[1] = color[2];
+          // color[2] = tmp;
 
-    await add_frame();
+          // tmp = color[0]+color[1]+color[2];
+          // tmp = tmp/3;
+          // color[0] = color[1] = color[2] = tmp*1.5;
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            let temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
+          function wrplus(index, wr) {
+            ii = index+wr;
+            // if ((ii % 256)*wr < (index % 256)*wr) {
+            //   return [0,0,0];
+            // }
+            if (ii < 0 || ii >= 256*256) {
+              return [0,0,0];
+            }
+            return DIANA_IMAGE[ii];
+          }
+
+          color_green=wrplus(i, red_offset);
+          color_blue=wrplus(i, green_offset);
+          color_red=wrplus(i, blue_offset);
+
+          color = [color_red[0], color_green[1], color_blue[2]];
+
+          draw_pixel(a,b,color)
+          i+=1
         }
-    }
-
-    let row_cols = [];
-    for (let i = 0; i < 256; i++) {
-        for (let j = 0; j < 256; j++) {
-            row_cols.push([i,j]);
-        }
-    }
-    shuffle(row_cols);
-
-    for (let i = 0; i < 256*256; i++) {
-      if (i % (256*9) == 0) {
-        await add_frame();
       }
-      let rc = row_cols[i];
-      let row = rc[0];
-      let col = rc[1];
-      // color=DIANA_IMAGE[row*256+col];
-      draw_pixel(row,col,black)
+
     }
 
+    function easing(x) {
+      return (Math.cos(Math.PI*x) + 1) / 2
+    }
+
+    function easing2(x) {
+      return 1-x*x;
+    }
+
+    function super_easing(x) {
+      return Math.random();
+    }
+
+    function easing3(x) {
+      return 1-x;
+    }
+
+    function easing4(x) {
+      return Math.cos(x*3*Math.PI/2+0*Math.PI)*Math.exp(-x*2)
+    }
+
+    function easing5(x) {
+      return Math.cos(x*1*Math.PI/2)*Math.exp(-x*1.5)
+    }
+
+    function easing6(x) {
+      return ((Math.cos(Math.PI*x) + 1) / 2)*Math.exp(-x*1.5)
+    }
+
+    function ofs(vec) {
+      return 256*vec[0]+vec[1];
+    }
+
+    function rot(vec, angle) {
+      // sin cos
+      // cos -sin
+      return [Math.floor(vec[0]*Math.sin(angle)+vec[1]*Math.cos(angle)),
+        Math.floor(vec[0]*Math.cos(angle)-vec[1]*Math.sin(angle))
+      ];
+    }
+
+    let n_frames = 90;
+    for (let i = 0; i < n_frames; i++) {
+      coeff = easing5(i/n_frames);
+      px_offs = Math.floor(100*coeff)
+      console.log(i, n_frames);
+      console.log(coeff);
+      console.log(px_offs);
+
+      let vec1 = rot([px_offs, 0], coeff*2*Math.PI)
+      let vec2 = rot([px_offs, px_offs], coeff*2*Math.PI)
+      let vec3 = rot([-px_offs, -px_offs], coeff*2*Math.PI)
+
+      draw_with_offset(ofs(vec1), ofs(vec2), ofs(vec3));
+      await add_frame();
+    }
+
+    draw_with_offset(0,0,0);
     await add_frame();
     await stop_recording()
 

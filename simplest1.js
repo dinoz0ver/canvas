@@ -8,7 +8,7 @@ WIDTH = SIZE;
 HEIGHT = SIZE;
 MULTIPLIER = 2;
 
-var FPS = 25;
+var FPS = 60;
 
 let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 let height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
@@ -26,7 +26,8 @@ RECORDING_CANVAS.setAttribute("height", `${HEIGHT*MULTIPLIER}`);
 RECORDING_CTX.imageSmoothingEnabled = false;
 
 var CANVAS_CTX = CANVAS.getContext("2d");
-var IMAGE_DATA = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
+var IMAGEDATA = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
+var EMPTY = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
 
 function div(a,b) {
     return Math.floor(a/b);
