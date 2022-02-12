@@ -66,13 +66,46 @@
     await start_recording()
 
     for (let a=0;a<256;a++) {
-      await add_frame()
       for (let b=0; b<256; b++) {
-        color=DIANA_IMAGE[i]
+        color=DIANA_IMAGE[i];
         draw_pixel(a,b,color)
         i+=1
       }
     }
+
+    i = 0;
+
+    await add_frame();
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+    let row_cols = [];
+    for (let i = 0; i < 256; i++) {
+        for (let j = 0; j < 256; j++) {
+            row_cols.push([i,j]);
+        }
+    }
+    shuffle(row_cols);
+
+    for (let i = 0; i < 256*256; i++) {
+      if (i % (256*9) == 0) {
+        await add_frame();
+      }
+      let rc = row_cols[i];
+      let row = rc[0];
+      let col = rc[1];
+      // color=DIANA_IMAGE[row*256+col];
+      draw_pixel(row,col,black)
+    }
+
+    await add_frame();
     await stop_recording()
 
     // 
