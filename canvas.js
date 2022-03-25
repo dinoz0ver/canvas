@@ -3,10 +3,10 @@ var HEIGHT;
 var SIZE;
 var MULTIPLIER;
 
-SIZE  = 256;
+SIZE  = 64;
 WIDTH = SIZE;
 HEIGHT = SIZE;
-MULTIPLIER = 2;
+MULTIPLIER = 8;
 
 var FPS = 60;
 
