@@ -71,7 +71,8 @@
     let red = [255,0,0];
     let white = [255,255,255];
     let black = [0,0,0];
-    clear_screen(black);
+    let grey = [128,128,128];
+    clear_screen(grey);
 
     function copypic(colorlist, w, h, row, col) {	
 		let i=0
@@ -83,17 +84,37 @@
 		}
     }
 
-    function copyareapic(colorlist, w, h, row, col, arearw, areacl, picw) {
+    function copyareapicc(colorlist, w, h, row, col, arearw, areacl, picw, reversedh=false) {
     	let arearow=arearw
     	let areacol=areacl
     	for (let rw=row; rw<row+h; rw++) {
     		for (let cl=col; cl<col+w; cl++) {
 	    		let i=arearow*picw+areacol
-	    		draw_pixel(rw, cl, colorlist[i])
+	    		if (reversedh)
+	    			draw_pixel(rw, w-(cl+1), colorlist[i])
+	    		else
+	    			draw_pixel(rw, cl, colorlist[i])
     			areacol++
     		}
     		arearow++
     		areacol=areacl
+    	}
+    }   
+
+    function copyareapic(colorlist, w, h, row, col, arearw, areacl, picw, reversedh=false) {
+    	for (let rw=0; rw<h; rw++) {
+    		for (let cl=0; cl<w; cl++) {
+    			let i=(arearw+rw)*picw+areacl+cl
+    			if (reversedh)
+    				draw_pixel(row+rw, w-1-cl+col, colorlist[i])
+    			else
+	    			draw_pixel(row+rw, col+cl, colorlist[i])
+	    		// let i=arearow*picw+areacol
+	    		// if (reversedh)
+	    			// draw_pixel(rw, w-(cl+1), colorlist[i])
+	    		// else
+	    			// draw_pixel(rw, cl, colorlist[i])
+    		}
     	}
     }
 
@@ -103,29 +124,48 @@
     let mariowdth=16
     let mariohght=28
     let framei=0
+    let marioframe=0
+    let goleft=false
 
     await start_recording()
 
     while (true) {
 		if (ISKEYPRESSED) {
 			if (mariocl>0)
-			    if (WHATKEYPRESSED=="KeyA")
+			    if (WHATKEYPRESSED=="KeyA") {
 			    	mariocl--
+			    	goleft=true
+			    }
 			if (mariorw>0)
 				if (WHATKEYPRESSED=="KeyW")
 			    	mariorw--
 			if (mariocl<WIDTH-mariowdth)
-			    if (WHATKEYPRESSED=="KeyD")
+			    if (WHATKEYPRESSED=="KeyD") {
 			    	mariocl++
+			    	goleft=false
+			    }
 			if (mariorw<HEIGHT-mariohght)
 			    if (WHATKEYPRESSED=="KeyS")
 			    	mariorw++
 		    ISKEYPRESSED=false
 		}
-		clear_screen(black)
+
+		if (marioframe==15) {
+			marioframe=0
+		}
+
+		clear_screen(grey)
+		if (marioframe>=10)
+			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 40, 56, goleft)
+		else if (marioframe>=5)
+			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 20, 56, goleft)
+		else if (marioframe>=0)
+			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56, goleft)
+		
 		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
-		copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56)
+		// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56)
 		await add_frame()
+		marioframe++
 		framei++
     }
 
