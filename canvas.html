@@ -12,6 +12,7 @@
   <script type="text/javascript" src="canvas.js"></script>
   <script type="text/javascript" src="recorder.js"></script>
   <script type="text/javascript" src="assets/mario.js"></script>
+  <script type="text/javascript" src="assets/mariosprite.js"></script>
   <script type="text/javascript">
   	var ISKEYPRESSED=false
   	var WHATKEYPRESSED=undefined
@@ -82,12 +83,29 @@
 		}
     }
 
-    await start_recording()
+    function copyareapic(colorlist, w, h, row, col, arearw, areacl, picw) {
+    	let arearow=arearw
+    	let areacol=areacl
+    	for (let rw=row; rw<row+h; rw++) {
+    		for (let cl=col; cl<col+w; cl++) {
+	    		let i=arearow*picw+areacol
+	    		draw_pixel(colorlist[i], rw, cl)
+    			areacol++
+    		}
+    		arearow++
+    		areacol=areacl
+    	}
+    }
+
 
     let mariocl=10
     let mariorw=10
     let mariowdth=16
-    let mariohght=16
+    let mariohght=28
+    let framei=0
+
+    await start_recording()
+
     while (true) {
 		if (ISKEYPRESSED) {
 			if (mariocl>0)
@@ -105,8 +123,10 @@
 		    ISKEYPRESSED=false
 		}
 		clear_screen(black)
-		copypic(MARIOCOL, 16, 16, mariorw, mariocl)
+		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
+		copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56)
 		await add_frame()
+		framei++
     }
 
 
