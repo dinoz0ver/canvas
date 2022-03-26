@@ -11,8 +11,19 @@
   </body>
   <script type="text/javascript" src="canvas.js"></script>
   <script type="text/javascript" src="recorder.js"></script>
-  <script type="text/javascript" src="assets/diana.js"></script>
+  <script type="text/javascript" src="assets/mario.js"></script>
   <script type="text/javascript">
+  	var ISKEYPRESSED=false
+  	var WHATKEYPRESSED=undefined
+  	function getevent(event) {
+  		console.log(`${event.code}`)
+  		ISKEYPRESSED=true
+  		WHATKEYPRESSED=event.code
+  	}
+  	document.addEventListener("keydown", getevent)
+  </script>
+  <script type="text/javascript">
+
 
     function set_style(color) {
       CANVAS_CTX.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -61,7 +72,45 @@
     let black = [0,0,0];
     clear_screen(black);
 
-    draw_pixel(WIDTH/2, HEIGHT/2, red);
+    function copypic(colorlist, w, h, row, col) {	
+		let i=0
+		for (let rw=row; rw<row+h; rw++) {
+			for (let cl=col; cl<col+w; cl++) {
+				draw_pixel(rw, cl, colorlist[i])
+				i++
+			}
+		}
+    }
+
+    await start_recording()
+
+    let mariocl=10
+    let mariorw=10
+    let mariowdth=16
+    let mariohght=16
+    while (true) {
+		if (ISKEYPRESSED) {
+			if (mariocl>0)
+			    if (WHATKEYPRESSED=="KeyA")
+			    	mariocl--
+			if (mariorw>0)
+				if (WHATKEYPRESSED=="KeyW")
+			    	mariorw--
+			if (mariocl<WIDTH-mariowdth)
+			    if (WHATKEYPRESSED=="KeyD")
+			    	mariocl++
+			if (mariorw<HEIGHT-mariohght)
+			    if (WHATKEYPRESSED=="KeyS")
+			    	mariorw++
+		    ISKEYPRESSED=false
+		}
+		clear_screen(black)
+		copypic(MARIOCOL, 16, 16, mariorw, mariocl)
+		await add_frame()
+    }
+
+
+    // draw_pixel(WIDTH/2, HEIGHT/2, red);
 
     // 
     // 

@@ -8,7 +8,7 @@ WIDTH = SIZE;
 HEIGHT = SIZE;
 MULTIPLIER = 8;
 
-var FPS = 60;
+var FPS = 30;
 
 let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 let height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
