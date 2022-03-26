@@ -89,7 +89,7 @@
     	for (let rw=row; rw<row+h; rw++) {
     		for (let cl=col; cl<col+w; cl++) {
 	    		let i=arearow*picw+areacol
-	    		draw_pixel(colorlist[i], rw, cl)
+	    		draw_pixel(rw, cl, colorlist[i])
     			areacol++
     		}
     		arearow++
