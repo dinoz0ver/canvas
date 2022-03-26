@@ -6,7 +6,7 @@ var RECORDER;
 
 class FrameByFrameCanvasRecorder {
   constructor(source_canvas, width, height, multiplier, FPS = 25) {
-  
+
     this.FPS = FPS;
     this.source = source_canvas;
     this.width = width;
@@ -14,8 +14,8 @@ class FrameByFrameCanvasRecorder {
     this.multiplier = multiplier;
 
     const canvas = source_canvas.cloneNode();
-    canvas.setAttribute("width", `${width*multiplier}`);
-    canvas.setAttribute("height", `${height*multiplier}`);
+    canvas.setAttribute("width", `${width * multiplier}`);
+    canvas.setAttribute("height", `${height * multiplier}`);
 
     const ctx = this.drawingContext = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
@@ -32,14 +32,12 @@ class FrameByFrameCanvasRecorder {
     // prepare our MediaRecorder
     const rec = this.recorder = new MediaRecorder(stream);
     const chunks = this.chunks = [];
-    rec.ondataavailable = (evt) => chunks.push(evt.data);
+    // rec.ondataavailable = (evt) => chunks.push(evt.data);
     rec.start();
     // we need to be in 'paused' state
-    waitForEvent(rec, 'start')
-      .then((evt) => rec.pause());
+    waitForEvent(rec, 'start').then((evt) => rec.pause());
     // expose a Promise for when it's done
     this._init = waitForEvent(rec, 'pause');
-
   }
   async recordFrame() {
 
@@ -52,9 +50,7 @@ class FrameByFrameCanvasRecorder {
     const height = this.height;
     const multiplier = this.multiplier;
 
-    function wait(ms) {
-      return new Promise(res => setTimeout(res, ms));
-    }
+    function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
 
     // start our timer now so whatever happens between is not taken in account
     const timer = wait(1000 / this.FPS);
@@ -63,9 +59,11 @@ class FrameByFrameCanvasRecorder {
     rec.resume();
     await waitForEvent(rec, 'resume');
 
-    // draw the current state of source on our internal canvas (triggers requestFrame in Chrome)
-    ctx.clearRect(0, 0, width*multiplier, height*multiplier);
-    ctx.drawImage(source, 0, 0, width, height, 0, 0, width*multiplier, height*multiplier);
+    // draw the current state of source on our internal canvas (triggers
+    // requestFrame in Chrome)
+    ctx.clearRect(0, 0, width * multiplier, height * multiplier);
+    ctx.drawImage(source, 0, 0, width, height, 0, 0, width * multiplier,
+                  height * multiplier);
     // force write the frame
     this.track.requestFrame();
 
@@ -75,22 +73,18 @@ class FrameByFrameCanvasRecorder {
     // sleep recorder
     rec.pause();
     await waitForEvent(rec, 'pause');
-
   }
-  async export () {
+  async export() {
 
     this.recorder.stop();
     this.stream.getTracks().forEach((track) => track.stop());
     await waitForEvent(this.recorder, "stop");
     return new Blob(this.chunks);
-
   }
 }
 
 // Promise based timer
-function wait(ms) {
-  return new Promise(res => setTimeout(res, ms));
-}
+function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
 // implements a sub-optimal monkey-patch for requestPostAnimationFrame
 // see https://stackoverflow.com/a/57549862/3702797 for details
 if (!window.requestPostAnimationFrame) {
@@ -102,9 +96,8 @@ if (!window.requestPostAnimationFrame) {
 }
 // Promisifies EventTarget.addEventListener
 function waitForEvent(target, type) {
-  return new Promise((res) => target.addEventListener(type, res, {
-    once: true
-  }));
+  return new Promise((res) =>
+                         target.addEventListener(type, res, {once : true}));
 }
 // creates a downloadable anchor from url
 function download(url, filename = "file.ext") {
@@ -116,7 +109,8 @@ function download(url, filename = "file.ext") {
 }
 
 async function start_recording() {
-  RECORDER = new FrameByFrameCanvasRecorder(CANVAS, WIDTH, HEIGHT, MULTIPLIER, FPS);
+  RECORDER =
+      new FrameByFrameCanvasRecorder(CANVAS, WIDTH, HEIGHT, MULTIPLIER, FPS);
 }
 
 async function add_frame() {
