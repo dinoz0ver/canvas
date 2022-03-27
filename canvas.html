@@ -16,12 +16,25 @@
   <script type="text/javascript">
   	var ISKEYPRESSED=false
   	var WHATKEYPRESSED=undefined
-  	function getevent(event) {
-  		console.log(`${event.code}`)
+  	var ISCLICKED=false
+  	var COLCLICK=undefined
+  	var ROWCLICK=undefined
+  	function getkey(event) {
+  		console.log(event.code)
   		ISKEYPRESSED=true
   		WHATKEYPRESSED=event.code
   	}
-  	document.addEventListener("keydown", getevent)
+
+  	function getmouseclick(event) {
+  		console.log(Math.floor(event.offsetY/MULTIPLIER), Math.floor(event.offsetX/MULTIPLIER))
+  		ROWCLICK=Math.floor(event.offsetY/MULTIPLIER)
+  		COLCLICK=Math.floor(event.offsetX/MULTIPLIER)
+  		ISCLICKED=true
+  	}
+
+  	document.addEventListener("keydown", getkey)
+  	CANVAS.addEventListener("mousedown", getmouseclick)
+
   </script>
   <script type="text/javascript">
 
@@ -80,10 +93,11 @@
     console.log(`Canvas width is ${WIDTH}`)
     console.log(`Canvas height is ${HEIGHT}`)
 
-    let red = [255,0,0];
-    let white = [255,255,255];
-    let black = [0,0,0];
-    let grey = [128,128,128];
+    var red = [255,0,0,255];
+    let white = [255,255,255,255];
+    let black = [0,0,0,255];
+    let grey = [128,128,128,255];
+    let blue = [0,0,255,255]
     clear_screen(grey);
 
     function copypic(colorlist, w, h, row, col) {	
@@ -130,6 +144,46 @@
     	}
     }
 
+    function drawbutton(row, col, color, width, height) {
+    	for (let rw=0; rw<height; rw++) {
+    		for (let cl=0; cl<width; cl++) {
+    			draw_pixel(rw+row, cl+col, color)
+    		}
+    	}
+    }
+
+    function drawbuttons(btns) {
+    	for (let i=0; i<btns.length; i++) {
+			let btn=btns[i]
+    		drawbutton(btn.row, btn.col, btn.color, btn.width, btn.height)
+    	}
+    }
+
+    function addbutton(btns, newbtn) {
+    	btns.push(newbtn)
+    	console.log(`new button: ${newbtn}`)
+    }
+
+    function bn(n,a,b) {
+    	if (n>=a && n<=b) 
+    		return true
+    	return false
+    }
+
+    function isbuttonclicked(btn, row, col) {
+    	if (bn(row, btn.row, btn.row+btn.height-1) && bn(col, btn.col, btn.col+btn.width-1))
+    		return true
+    	return false
+    }
+
+    function checkbuttonsclicked(btns, row, col) {
+    	for (i=0; i<btns.length; i++) {
+    		if (isbuttonclicked(btns[i], row, col)) {
+    			btns[i].color=red
+    		}
+    	}
+    }
+
 
     let mariocl=10
     let mariorw=10
@@ -139,7 +193,24 @@
     let marioframe=0
     let goleft=false
 
+    let buttons=[]
+    // drawbutton(10, 10, blue, 20, 10)
+    addbutton(buttons, {row:10, col:10, color:blue, width:20, height:10})
+    addbutton(buttons, {row:22, col:10, color:red, width:20, height:10})
+
     await start_recording()
+
+    // for (let j=0;j<11;j++) {
+    //   a=0
+    //   for (let x=j*2; x<WIDTH; x++) {
+    //     draw_pixel(a, x, red)
+    //     draw_pixel(x, a, red)
+    //     a+=1
+    //   }
+    // }
+
+
+    await add_frame()
 
     while (true) {
 		if (ISKEYPRESSED) {
@@ -173,6 +244,13 @@
 			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 20, 56, goleft)
 		else if (marioframe>=0)
 			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56, goleft)
+
+		if (ISCLICKED) {
+			checkbuttonsclicked(buttons, ROWCLICK, COLCLICK)
+			ISCLICKED=false
+		}
+
+		drawbuttons(buttons)
 		
 		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
 		// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56)
@@ -243,7 +321,7 @@
     // red = [255, 0, 0]
     // b=0
 
-    // // for (let i=-1;i<15;i++) {
+    // for (let i=-1;i<15;i++) {
     // for (let j=0;j<11;j++) {
     //   a=0
     //   for (let x=j*3; x<32; x++) {
