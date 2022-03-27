@@ -32,6 +32,7 @@ async function start_recording() {
 }
 
 async function add_frame() {
+  CANVAS_CTX.putImageData(CANVAS_DATA, 0, 0);
   return await RECORDER.addFrame();
 }
 

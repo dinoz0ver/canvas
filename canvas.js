@@ -14,23 +14,28 @@ let width = window.innerWidth || document.documentElement.clientWidth || documen
 let height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 var CANVAS = document.getElementById('main');
+var CANVAS_CTX = CANVAS.getContext("2d");
+var CANVAS_DATA = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
+var EMPTY = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
 CANVAS.setAttribute("width", `${WIDTH}`);
 CANVAS.setAttribute("height", `${HEIGHT}`);
 CANVAS.style.width = `${WIDTH*MULTIPLIER}px`;
 CANVAS.style.height = `${HEIGHT*MULTIPLIER}px`;
 
-var RECORDING_CANVAS = document.createElement("canvas");
-var RECORDING_CTX = RECORDING_CANVAS.getContext("2d");
-RECORDING_CANVAS.setAttribute("width", `${WIDTH*MULTIPLIER}`);
-RECORDING_CANVAS.setAttribute("height", `${HEIGHT*MULTIPLIER}`);
-RECORDING_CTX.imageSmoothingEnabled = false;
+var TMP_CANVAS = document.createElement("canvas");
+var TMP_CTX = TMP_CANVAS.getContext("2d");
+TMP_CANVAS.setAttribute("width", `${WIDTH*MULTIPLIER}`);
+TMP_CANVAS.setAttribute("height", `${HEIGHT*MULTIPLIER}`);
+TMP_CTX.imageSmoothingEnabled = false;
 
-var CANVAS_CTX = CANVAS.getContext("2d");
-var IMAGEDATA = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
-var EMPTY = CANVAS_CTX.createImageData(WIDTH, HEIGHT);
 
 function div(a,b) {
     return Math.floor(a/b);
+}
+
+function arraysEqual(a1,a2) {
+    /* WARNING: arrays must not contain {objects} or behavior may be undefined */
+    return JSON.stringify(a1)==JSON.stringify(a2);
 }
 
 

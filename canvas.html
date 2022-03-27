@@ -25,22 +25,34 @@
   </script>
   <script type="text/javascript">
 
+    var current_style = [0,0,0];
 
-    function set_style(color) {
-      CANVAS_CTX.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+    function set_style(ctx, color) {
+      ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      current_style = color;
     }
 
+    var background = CANVAS_CTX.createImageData(WIDTH, HEIGHT).data;
+
     function clear_screen(color) {
-      set_style(color);
-      CANVAS_CTX.fillRect(0, 0, WIDTH, HEIGHT );
+      if (!arraysEqual(color, current_style)) {
+        set_style(TMP_CTX, color);
+        TMP_CTX.fillRect(0, 0, WIDTH, HEIGHT);
+        let new_background = TMP_CTX.getImageData(0, 0, WIDTH, HEIGHT).data;
+        background.set(new_background);
+      }
+      CANVAS_DATA.data.set(background);
     }
 
     function draw_pixel(row, col, color) {
-      if (color.length == 4 && color[3] == 0) {
+      if (color[3] == 0) {
         return;
       }
-      set_style(color);
-      CANVAS_CTX.fillRect(col, row, 1, 1 );
+      let idx = (row*WIDTH+col)*4;
+      CANVAS_DATA.data[idx+0] = color[0];
+      CANVAS_DATA.data[idx+1] = color[1];
+      CANVAS_DATA.data[idx+2] = color[2];
+      CANVAS_DATA.data[idx+3] = color[3];
     }
   </script>
 
