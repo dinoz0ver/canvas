@@ -81,8 +81,12 @@
     // 
     // < your code goes here >
     // 
-    // 
-    // 
+    // to do
+    // -пока нету
+    // done
+    // -добавить список персонажей и написать там их статы, где находятся и как отрисовывать их
+    // -добавить health бары прикреплённые к персонажу
+    // -по нажатию кнопки вычитать hp
     // 
     // 
     // 
@@ -94,11 +98,13 @@
     console.log(`Canvas height is ${HEIGHT}`)
 
     var red = [255,0,0,255];
-    let white = [255,255,255,255];
-    let black = [0,0,0,255];
-    let grey = [128,128,128,255];
-    let blue = [0,0,255,255]
-    clear_screen(grey);
+    var white = [255,255,255,255];
+    var black = [0,0,0,255];
+    var grey = [128,128,128,255];
+    var blue = [0,0,255,255];
+    var green = [0,255,0,255];
+    var brown = [165,42,42,255];
+    // clear_screen(grey);
 
     function copypic(colorlist, w, h, row, col) {	
 		let i=0
@@ -144,7 +150,7 @@
     	}
     }
 
-    function drawbutton(row, col, color, width, height) {
+    function drawrect(row, col, color, width, height) {
     	for (let rw=0; rw<height; rw++) {
     		for (let cl=0; cl<width; cl++) {
     			draw_pixel(rw+row, cl+col, color)
@@ -152,10 +158,25 @@
     	}
     }
 
+    function addcharacer(crctrs, newcrctr, names) {
+    	crctrs[newcrctr.name]=newcrctr
+    	names.push(newcrctr.name)
+    	console.log(`new character: ${newcrctr}`)
+    }
+
+    function drawcharacters(crctrs, names) {
+    	for (let i=0; i<names.length; i++) {
+    		let crt=crctrs[names[i]]
+    		copyareapic(crt.colorlist, crt.w, crt.h, crt.row , crt.col, crt.frames[crt.fri].arearw, crt.frames[crt.fri].areacl, crt.picw, crt.reversedh)
+    		drawrect(crt.row-4, Math.floor(crt.col+crt.w/2-crt.maxhealth/2), brown, crt.maxhealth, 2)
+    		drawrect(crt.row-4, Math.floor(crt.col+crt.w/2-crt.maxhealth/2), green, crt.currenthealth, 2)
+    	}
+    }
+
     function drawbuttons(btns) {
     	for (let i=0; i<btns.length; i++) {
 			let btn=btns[i]
-    		drawbutton(btn.row, btn.col, btn.color, btn.width, btn.height)
+    		drawrect(btn.row, btn.col, btn.color, btn.width, btn.height)
     	}
     }
 
@@ -176,27 +197,90 @@
     	return false
     }
 
-    function checkbuttonsclicked(btns, row, col) {
-    	for (i=0; i<btns.length; i++) {
+    function checkbuttonsclicked(btns, row, col, crts) {
+    	for (let i=0; i<btns.length; i++) {
     		if (isbuttonclicked(btns[i], row, col)) {
     			btns[i].color=red
     		}
     	}
+		if (isbuttonclicked(btns[0], row, col)) {
+			if (crts.mario.currenthealth<=0) {
+				return
+			}
+			crts.mario.currenthealth=crts.mario.currenthealth-2
+			if (crts.mario.currenthealth<=0) {
+				console.log("mario died lol")
+				crts.mario.w=0
+				crts.mario.h=0
+				crts.mario.maxhealth=0
+			}
+		}
+		if (isbuttonclicked(btns[1], row, col)) {
+			if (crts.mario2.currenthealth<=0) {
+				return
+			}
+			crts.mario2.currenthealth=crts.mario2.currenthealth-2
+			if (crts.mario2.currenthealth<=0) {
+				console.log("mario2 died lol")
+				crts.mario2.w=0
+				crts.mario2.h=0
+				crts.mario2.maxhealth=0
+			}
+		}
     }
 
 
-    let mariocl=10
-    let mariorw=10
+    let mariocl=41
+    let mariorw=26
     let mariowdth=16
     let mariohght=28
     let framei=0
     let marioframe=0
     let goleft=false
+    let marioarearw=0
+    let marioareacl=0
+    let mariopicw=56
+
 
     let buttons=[]
+    	// args:
+    	//   row, col, color, width, height
+    let characters={}
+    	// args:
+    	//   colorlist, w, h, row, col, picw, reversedh, frames:[{arearw, areacl}, {arearw, areacl}, ...]
+    let namescharacters=[]
     // drawbutton(10, 10, blue, 20, 10)
-    addbutton(buttons, {row:10, col:10, color:blue, width:20, height:10})
-    addbutton(buttons, {row:22, col:10, color:red, width:20, height:10})
+    addcharacer(characters, {
+    	colorlist: MARIOSPRITE, 
+    	w:16, 
+    	h:28, 
+    	row:mariorw, 
+    	col:mariocl, 
+    	picw:mariopicw, 
+    	reversedh:goleft,
+    	frames:[{arearw:0,areacl:0}, {arearw:0,areacl:20}, {arearw:0,areacl:40}],
+    	fri:0,
+    	name:"mario",
+    	maxhealth:20,
+    	currenthealth:20
+    }, namescharacters)
+
+    addcharacer(characters, {
+    	colorlist: MARIOSPRITE, 
+    	w:16, 
+    	h:28, 
+    	row:26, 
+    	col:134, 
+    	picw:mariopicw, 
+    	reversedh:true,
+    	frames:[{arearw:0,areacl:0}, {arearw:0,areacl:20}, {arearw:0,areacl:40}],
+    	fri:0,
+    	name:"mario2",
+    	maxhealth:20,
+    	currenthealth:20
+    }, namescharacters)
+    addbutton(buttons, {row:69, col:75, color:blue, width:20, height:10})
+    addbutton(buttons, {row:69, col:96, color:blue, width:20, height:10})
 
     await start_recording()
 
@@ -213,43 +297,62 @@
     await add_frame()
 
     while (true) {
-		if (ISKEYPRESSED) {
-			if (mariocl>0)
-			    if (WHATKEYPRESSED=="KeyA") {
-			    	mariocl--
-			    	goleft=true
-			    }
-			if (mariorw>0)
-				if (WHATKEYPRESSED=="KeyW")
-			    	mariorw--
-			if (mariocl<WIDTH-mariowdth)
-			    if (WHATKEYPRESSED=="KeyD") {
-			    	mariocl++
-			    	goleft=false
-			    }
-			if (mariorw<HEIGHT-mariohght)
-			    if (WHATKEYPRESSED=="KeyS")
-			    	mariorw++
-		    ISKEYPRESSED=false
-		}
+		// if (ISKEYPRESSED) {
+		// 	if (mariocl>0)
+		// 	    if (WHATKEYPRESSED=="KeyA") {
+		// 	    	mariocl--
+		// 	    	goleft=true
+		// 	    }
+		// 	if (mariorw>0)
+		// 		if (WHATKEYPRESSED=="KeyW")
+		// 	    	mariorw--
+		// 	if (mariocl<WIDTH-mariowdth)
+		// 	    if (WHATKEYPRESSED=="KeyD") {
+		// 	    	mariocl++
+		// 	    	goleft=false
+		// 	    }
+		// 	if (mariorw<HEIGHT-mariohght)
+		// 	    if (WHATKEYPRESSED=="KeyS")
+		// 	    	mariorw++
+		//     ISKEYPRESSED=false
+		// }
 
 		if (marioframe==15) {
 			marioframe=0
 		}
 
-		clear_screen(grey)
-		if (marioframe>=10)
-			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 40, 56, goleft)
-		else if (marioframe>=5)
-			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 20, 56, goleft)
-		else if (marioframe>=0)
-			copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56, goleft)
+		clear_screen(black)
+		if (marioframe>=10) {
+			// marioarearw=0
+			// marioareacl=40
+			// mariopicw=56
+			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
+			characters.mario.fri=2
+			characters.mario2.fri=2
+		}
+		else if (marioframe>=5) {
+			// marioarearw=0
+			// marioareacl=20
+			// mariopicw=56
+			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
+			characters.mario.fri=1
+			characters.mario2.fri=1
+		}
+		else if (marioframe>=0) {
+			// marioarearw=0
+			// marioareacl=0
+			// mariopicw=56
+			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
+			characters.mario.fri=0
+			characters.mario2.fri=0
+		}
 
 		if (ISCLICKED) {
-			checkbuttonsclicked(buttons, ROWCLICK, COLCLICK)
+			checkbuttonsclicked(buttons, ROWCLICK, COLCLICK, characters)
 			ISCLICKED=false
 		}
 
+		drawcharacters(characters, namescharacters)
 		drawbuttons(buttons)
 		
 		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
