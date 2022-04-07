@@ -4,9 +4,9 @@ var SIZE;
 var MULTIPLIER;
 
 SIZE  = 128;
-WIDTH = 190;
-HEIGHT = 80;
-MULTIPLIER = 5;
+WIDTH = 190*2;
+HEIGHT = 80*2;
+MULTIPLIER = 2.5;
 
 var FPS = 30;
 

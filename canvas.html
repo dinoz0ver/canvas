@@ -83,14 +83,18 @@
     // < your code goes here >
     // 
     // to do
-    // -добавить ии противника
-    // -добавить мультиплаер(множитель) для drawareapic
+    // -добавить другие способы атаки и способности(хилл?)
+    // -добавить текст на кнопку(он должен быть прикреплён к кнопке как её параметр)
+    // -добавить пати персов
+    // -добавить переключение между ними
     // done
     // -добавить список персонажей и написать там их статы, где находятся и как отрисовывать их
     // -добавить health бары прикреплённые к персонажу
     // -по нажатию кнопки вычитать hp
     // -ходы противника(только доработать ии надо ещё)
     // -текст
+    // -добавить ии противника
+    // -добавить мультиплаер(множитель) для drawareapic
     // 
     // 
     // 
@@ -136,12 +140,12 @@
     	}
     }   
 
-    function copyareapic(colorlist, w, h, row, col, arearw, areacl, picw, reversedh=false) {
-    	for (let rw=0; rw<h; rw++) {
-    		for (let cl=0; cl<w; cl++) {
-    			let i=(arearw+rw)*picw+areacl+cl
+    function copyareapic(colorlist, w, h, row, col, arearw, areacl, picw, reversedh=false, mw=1, mh=1) {
+    	for (let rw=0; rw<h*mh; rw++) {
+    		for (let cl=0; cl<w*mw; cl++) {
+    			let i=(arearw+Math.floor(rw/mh))*picw+areacl+Math.floor(cl/mw)
     			if (reversedh)
-    				draw_pixel(row+rw, w-1-cl+col, colorlist[i])
+    				draw_pixel(row+rw, w*mw-1-cl+col, colorlist[i])
     			else
 	    			draw_pixel(row+rw, col+cl, colorlist[i])
 	    		// let i=arearow*picw+areacol
@@ -153,9 +157,9 @@
     	}
     }
 
-    function drawrect(row, col, color, width, height) {
-    	for (let rw=0; rw<height; rw++) {
-    		for (let cl=0; cl<width; cl++) {
+    function drawrect(row, col, color, width, height, mw=1, mh=1) {
+    	for (let rw=0; rw<height*mh; rw++) {
+    		for (let cl=0; cl<width*mw; cl++) {
     			draw_pixel(rw+row, cl+col, color)
     		}
     	}
@@ -170,9 +174,9 @@
     function drawcharacters(crctrs, names) {
     	for (let i=0; i<names.length; i++) {
     		let crt=crctrs[names[i]]
-    		copyareapic(crt.colorlist, crt.w, crt.h, crt.row , crt.col, crt.frames[crt.fri].arearw, crt.frames[crt.fri].areacl, crt.picw, crt.reversedh)
-    		drawrect(crt.row-4, Math.floor(crt.col+crt.w/2-crt.maxhealth/2), brown, crt.maxhealth, 2)
-    		drawrect(crt.row-4, Math.floor(crt.col+crt.w/2-crt.maxhealth/2), green, crt.currenthealth, 2)
+    		copyareapic(crt.colorlist, crt.w, crt.h, crt.row , crt.col, crt.frames[crt.fri].arearw, crt.frames[crt.fri].areacl, crt.picw, crt.reversedh, crt.mw, crt.mh)
+    		drawrect(crt.row-4*crt.mh, Math.floor(crt.col+crt.w*crt.mw/2-crt.w*crt.mw/2), brown, crt.w, 2, crt.mw, crt.mh)
+    		drawrect(crt.row-4*crt.mh, Math.floor(crt.col+crt.w*crt.mw/2-crt.w*crt.mw/2), green, Math.round(crt.w*crt.currenthealth/crt.maxhealth), 2, crt.mw, crt.mh)
     	}
     }
 
@@ -195,13 +199,14 @@
     }
 
     function isbuttonclicked(btn, row, col) {
-    	if (bn(row, btn.row, btn.row+btn.height-1) && bn(col, btn.col, btn.col+btn.width-1))
+    	if (bn(row, btn.row, btn.row+btn.height-1) && bn(col, btn.col, btn.col+btn.width-1) && ISCLICKED)
     		return true
     	return false
     }
 
     var yourturn=true
     var botturn=false
+    var oneturnonemove=0
 
     function changeturn() {
     	if (yourturn) {
@@ -212,6 +217,8 @@
 			botturn=!botturn
 			yourturn=!yourturn
 		}
+		oneturnonemove=0
+		console.log("turn changed")
     }
 
     function checkbuttonsclicked(btns, row, col) {
@@ -219,11 +226,8 @@
     	let buttonsclicked=[]
     	for (let i=0; i<btns.length; i++) {
     		if (isbuttonclicked(btns[i], row, col)) {
-    			btns[i].color=red
     			buttonsclicked.push(i)
     		}
-    		else
-    			btns[i].color=blue
     	}
 		return buttonsclicked
 		// if (isbuttonclicked(btns[0], row, col) && whoturn==0) {
@@ -262,11 +266,24 @@
 		// }
     }
 
+    function addmove(moves, type, frame, delay, towho, fromwho) {
+    	// console.log(oneturnonemove, "oneturnonemove")
+    	if (oneturnonemove==0) {
+	    	if (type=="attack") {
+	    		moves.push({type:type, frame:frame, delay:delay, towho:towho, fromwho:fromwho})	
+	    	}
+	    	else
+	    		console.log("type for addmove is not defined")
+	    	oneturnonemove=1
+	    	// console.log(oneturnonemove, "oneturnonemove")
+    	}
+    }
+
     function actionfrombutton(ibuttonscliked, moves, frame) {
     	for (let i=0; i<ibuttonscliked.length; i++) {
     		if (ibuttonscliked[i]==0 && yourturn) {
-    			moves.push({type:"attack", frame:frame, delay:15, towho:"mario2", fromwho:"mario"})
-    			changeturn()
+    			// moves.push({type:"attack", frame:frame, delay:15, towho:"mario2", fromwho:"mario"})
+    			addmove(moves, "attack", frame, 15, "mario2", "mario")
     		}
     		// else {
     		// 	moves.push({type:"default", frame:frame, delay:0})
@@ -276,6 +293,14 @@
 
     function buttonattack(crts, towho, fromwho) {
     	console.log(towho)
+		if (!(towho in crts)) {
+			console.log("towho not in dict")
+			return
+		}
+		if (!(fromwho in crts)) {
+			console.log("fromwho not in dict")
+			return
+		}
 		if (crts[towho].currenthealth<=0) {
 			console.log("currenthealth was 0 or lower")
 			return
@@ -283,6 +308,7 @@
 		if (crts[towho].currenthealth<=crts[fromwho].damage)
 			crts[towho].currenthealth=crts[fromwho].damage
 		crts[towho].currenthealth=crts[towho].currenthealth-crts[fromwho].damage
+		changeturn()
     }
 
     function checkmoves(moves, framei, crts) {
@@ -302,8 +328,8 @@
     }
 
     function botmoves(moves, frame) {
-    	moves.push({type:"attack", frame:frame, delay:30, towho:"mario", fromwho:"mario2"})
-    	changeturn()
+    	// moves.push({type:"attack", frame:frame, delay:30, towho:"mario", fromwho:"mario2"})
+    	addmove(moves, "attack", frame, 15, "mario", "mario2")
     }
 
     function calculateltc(rowpic, colpic) {
@@ -329,6 +355,7 @@
     }
 
     function drawstr(row, col, str, ltcfont, colorlist, picw) {
+    	// let widthtext=0
     	for (let i=0; i<str.length; i++) {
 	    	let flag=0
     		for (let l=0; l<ltcfont.length; l++) {
@@ -337,16 +364,18 @@
     				ltc=ltcfont[l]
     				copyareapic(colorlist, ltc.w, ltc.h, row, col, ltc.row, ltc.col, picw)
     				col=col+ltc.w+1
+    				// widthtext=widthtext+ltc.w+1
     			}
     		}
     		if (flag==0) {
     			console.log(`${str[i]} is not in ltcfont`)
     		}
     	}
+    	// widthtext=widthtext-1
     }
 
+	var died=false
     function winconditions(crts, nms) {
-    	let died=false
     	for (let i=0; i<nms.length; i++) {
     		if (crts[nms[i]].currenthealth<=0) {
     			delete crts[nms[i]]
@@ -357,25 +386,38 @@
     	if (died) {
     		return nms[0]
     	}
-    	return died
     }
 
-    function drawresult(nms, ltcfont, colorlist, picw) {
+    function mathtxtw(str, ltcfont) {
+    	let widthtext=0
+    	for (let i=0; i<str.length; i++) {
+    		for (let l=0; l<ltcfont.length; l++) {
+    			if (str[i]==ltcfont[l].l) {
+    				ltc=ltcfont[l]
+    				widthtext=widthtext+ltc.w+1
+    			}
+    		}
+    	}
+    	widthtext=widthtext-1
+    	return widthtext
+    }
+
+    function drawresult(nm, ltcfont, colorlist, picw) {
     	// if (nms.length==0) {
     	// 	drawstr(10, 49, "ничья, все умерли", ltcfont, colorlist, picw)
     	// }
-    	if (nms[0]=="mario") {
-    		drawstr(10, 49, "выиграл марио", ltcfont, colorlist, picw)
+    	if (nm=="mario") {
+    		widthtext=mathtxtw("выиграл марио", ltcfont)
+    		drawstr(Math.floor(HEIGHT/4-8/2), Math.floor(WIDTH/2-widthtext/2), "выиграл марио", ltcfont, colorlist, picw)
     	}
-    	if (nms[0]=="mario2") {
-    		drawstr(10, 49, "выиграл марио бот", ltcfont, colorlist, picw)
+    	if (nm=="mario2") {
+    		widthtext=mathtxtw("выиграл марио бот", ltcfont)
+    		drawstr(10*2, 49*2, "выиграл марио бот", ltcfont, colorlist, picw)
     	}
     }
 
 
 
-    let mariocl=41
-    let mariorw=26
     let mariowdth=16
     let mariohght=28
     let framei=0
@@ -384,6 +426,11 @@
     let marioarearw=0
     let marioareacl=0
     let mariopicw=56
+    let mariocl=Math.floor(WIDTH/4-mariowdth/2)
+    let mariorw=Math.floor(HEIGHT/2-mariohght/2)
+
+    let mario2cl=Math.floor(WIDTH/4*3-mariowdth/2)
+    let mario2rw=Math.floor(HEIGHT/2-mariohght/2)
 
 
     let buttons=[]
@@ -413,15 +460,17 @@
     	name:"mario",
     	maxhealth:20,
     	currenthealth:20,
-    	damage:2
+    	damage:2,
+    	mw:2,
+    	mh:2
     }, namescharacters)
 
     addcharacer(characters, {
     	colorlist: MARIOSPRITE, 
     	w:16, 
     	h:28, 
-    	row:26, 
-    	col:134, 
+    	row:mario2rw, 
+    	col:mario2cl, 
     	picw:mariopicw, 
     	reversedh:true,
     	frames:[{arearw:0,areacl:0}, {arearw:0,areacl:20}, {arearw:0,areacl:40}],
@@ -429,9 +478,18 @@
     	name:"mario2",
     	maxhealth:20,
     	currenthealth:20,
-    	damage:2
+    	damage:2,
+    	mw:2,
+    	mh:2
     }, namescharacters)
-    addbutton(buttons, {row:69, col:75, color:blue, width:20, height:10})
+
+    let abuttoncolor=red
+    let abuttonw=20
+    let abuttonh=10
+    let abuttonrw=HEIGHT-abuttonh-1
+    let abuttoncl=WIDTH/2-abuttonw/2
+
+    addbutton(buttons, {row:abuttonrw, col:abuttoncl, color:abuttoncolor, width:abuttonw, height:abuttonh})
     // addbutton(buttons, {row:69, col:96, color:blue, width:20, height:10})
 
 
@@ -482,45 +540,66 @@
 			// marioareacl=40
 			// mariopicw=56
 			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			characters.mario.fri=2
-			characters.mario2.fri=2
+			if ("mario" in characters) {
+				characters.mario.fri=2
+			}
+			if ("mario2" in characters) {
+				characters.mario2.fri=2
+			}
 		}
 		else if (marioframe>=5) {
 			// marioarearw=0
 			// marioareacl=20
 			// mariopicw=56
 			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			characters.mario.fri=1
-			characters.mario2.fri=1
+			if ("mario" in characters) {
+				characters.mario.fri=1
+			}
+			if ("mario2" in characters) {
+				characters.mario2.fri=1
+			}
 		}
 		else if (marioframe>=0) {
 			// marioarearw=0
 			// marioareacl=0
 			// mariopicw=56
 			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			characters.mario.fri=0
-			characters.mario2.fri=0
+			if ("mario" in characters) {
+				characters.mario.fri=0
+			}
+			if ("mario2" in characters) {
+				characters.mario2.fri=0
+			}
 		}
 
 
+		if (yourturn) {
+			buttons[0].color=red
+		}
+
+		// console.log(checkbuttonsclicked(buttons, ROWCLICK, COLCLICK)[0], "checkbuttonsclicked(buttons, ROWCLICK, COLCLICK)[0]")
+		if (oneturnonemove==1 && yourturn)
+			buttons[0].color=blue
 
 		if (ISCLICKED) {
 			actionfrombutton(checkbuttonsclicked(buttons, ROWCLICK, COLCLICK), moves, framei)
 			ISCLICKED=false
 		}
 
+
 		if (botturn) {
 			botmoves(moves, framei)
 		}
 
+		winconditions(characters, namescharacters)
 		checkmoves(moves, framei, characters)
 
 		drawcharacters(characters, namescharacters)
 		drawbuttons(buttons)
-		winconditions(characters, namescharacters)
-		if (winconditions(characters, namescharacters)!=false) {
+		if (died) {
 			drawresult(winconditions(characters, namescharacters), ltcfont, FONT, FONT_SIZE.width)
 		}
+
 		// drawstr(10, 49, "ничья все умерли", ltcfont, FONT, FONT_SIZE.width)
 		
 		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
@@ -528,6 +607,8 @@
 		await add_frame()
 		marioframe++
 		framei++
+		if (died)
+			break
     }
 
 
