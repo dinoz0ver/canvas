@@ -15,6 +15,10 @@
   <script type="text/javascript" src="assets/mariosprite.js"></script>
   <script type="text/javascript" src="assets/font.js"></script>
   <script type="text/javascript" src="assets/bgsnow.js"></script>
+  <script type="text/javascript" src="assets/mariolittle.js"></script>
+  <script type="text/javascript" src="assets/redmariosprite.js"></script>
+  <script type="text/javascript" src="assets/marioyoshisprite.js"></script>
+  <script type="text/javascript" src="assets/luigisprite.js"></script>
   <script type="text/javascript">
   	var ISKEYPRESSED=false
   	var WHATKEYPRESSED=undefined
@@ -476,6 +480,43 @@
     	}
     }
 
+    function drawtxtbox(row, col, w, h, txt) {
+    	drawrect(row, col, black, w, h)
+    	drawrect(row+1, col+1, white, w-2, h-2)
+    	drawstr(row+2, col+2, txt)
+    }
+
+    function drawramochka(row, col, w, h, color) {
+    	drawrect(row, col, color, w, h)
+    	drawrect(row+1, col+1, white, w-2, h-2)
+    }
+
+    function drawteams(bgw, bgh, w, h, teams) {
+    	drawrect(Math.floor(bgh/2-h/2), 0, white, w, h)
+    	drawrect(Math.floor(bgh/2-h/2), bgw-w, white, w, h)
+		mw=MARIOLITTLE_SIZE.width
+		mh=MARIOLITTLE_SIZE.height
+		row=Math.floor(bgh/2-h/2)+1
+		col=1
+    	for (let i=0; i<teams[0].length; i++) {
+    		drawramochka(row, col, mw+2, mh+2, black)
+    		copyareapic(MARIOLITTLE, mw, mh, row+1, col+1, 0, 0, mw, true)
+    		row=row+13
+    	} 
+    	row=Math.floor(bgh/2-h/2)+1
+    	col=bgw-mw-3
+		for (let i=0; i<teams[1].length; i++) {
+    		drawramochka(row, col, mw+2, mh+2, black)
+    		copyareapic(MARIOLITTLE, mw, mh, row+1, col+1, 0, 0, mw)
+    		row=row+13
+    	}
+    	// drawramochka(Math.floor(bgh/2-h/2+1), 1, 12, 12, black)
+    	// copyareapic(MARIOLITTLE, 10, 10, Math.floor(bgh/2-h/2+2), 2, 0, 0, 10)
+
+    	// drawramochka(Math.floor(bgh/2-h/2+1), bgw-w+1, 12, 12, black)
+    	// copyareapic(MARIOLITTLE, 10, 10, Math.floor(bgh/2-h/2+2), bgw-w+2, 0, 0, 10, true)
+    }
+
 
 
     let mariowdth=16
@@ -494,16 +535,13 @@
 
 
     let buttons=[]
-    	// args:
-    	//   row, col, color, width, height
     characters={}
-    	// args:
-    	//   colorlist, w, h, row, col, picw, reversedh, frames:[{arearw, areacl}, {arearw, areacl}, ...]
     let namescharacters=[]
     // drawbutton(10, 10, blue, 20, 10)
+    let team1=["mario", "mario", "mario"]
+    let team2=["mario2", "mario2"]
+    let teams=[team1, team2]
     let moves=[]
-    	// args:
-    	//   type:attack, frame, delay
     var ltcfont=calculateltc(9, 0)
     console.log(calculateltc(9, 0))
 
@@ -546,13 +584,13 @@
     }, namescharacters)
 
     let abuttoncolor=white
-    let abuttonw=36
-    let abuttonh=11+2
-    let abuttonrw=HEIGHT-abuttonh-1
-    let abuttoncl=WIDTH/2-abuttonw-1
+    let abuttonw=36*2
+    let abuttonh=11*2
+    let abuttonrw=BGSNOW_SIZE.height+2
+    let abuttoncl=WIDTH/2+14
 
     addbutton(buttons, {
-    	row:Math.floor(abuttonrw-abuttonh-1), 
+    	row:Math.floor(abuttonrw), 
     	col:Math.floor(abuttoncl), 
     	color:abuttoncolor, 
     	width:abuttonw, 
@@ -562,17 +600,17 @@
     	pressed:false
     })
     addbutton(buttons, {
-    	row:Math.floor(abuttonrw), 
-    	col:Math.floor(WIDTH/2-35-2), 
+    	row:Math.floor(abuttonrw+abuttonh+1), 
+    	col:Math.floor(abuttoncl), 
     	color:abuttoncolor, 
-    	width:73, 
+    	width:abuttonw*2+1, 
     	height:abuttonh,
     	text:"супер атака",
     	textw:mathtxtw("супер атака"),
     	pressed:false
     })
     addbutton(buttons, {
-    	row:Math.floor(abuttonrw-abuttonh-1), 
+    	row:Math.floor(abuttonrw), 
     	col:Math.floor(abuttoncl+1+abuttonw), 
     	color:abuttoncolor, 
     	width:abuttonw, 
@@ -602,6 +640,8 @@
     while (true) {
     	clear_screen(white)
     	copypic(BGSNOW, BGSNOW_SIZE.width, BGSNOW_SIZE.height, 0, 0)
+    	drawtxtbox(BGSNOW_SIZE.height+2, 2, WIDTH/2+11, HEIGHT-BGSNOW_SIZE.height-5, "щмщшккщаущшкау")
+    	drawteams(BGSNOW_SIZE.width, BGSNOW_SIZE.height, 14, 14*4, teams)
 
     	// console.log(mathtxtw("атака"), "атака ширина")
     	// console.log(mathtxtw("супер атака"), "суператака ширина")
