@@ -19,6 +19,18 @@
   <script type="text/javascript" src="assets/redmariosprite.js"></script>
   <script type="text/javascript" src="assets/marioyoshisprite.js"></script>
   <script type="text/javascript" src="assets/luigisprite.js"></script>
+<!--   <script type="text/javascript" src="assets/smolmario.png"></script> -->
+  <script type="text/javascript" src="assets/azazel.js"></script>
+  <script type="text/javascript" src="assets/cerberus.js"></script>
+  <script type="text/javascript" src="assets/glasses.js"></script>
+  <script type="text/javascript" src="assets/judgement.js"></script>
+  <script type="text/javascript" src="assets/lightning.js"></script>
+  <script type="text/javascript" src="assets/justice.js"></script>
+  <script type="text/javascript" src="assets/malina.js"></script>
+  <script type="text/javascript" src="assets/modeus.js"></script>
+  <script type="text/javascript" src="assets/pancakes.js"></script>
+  <script type="text/javascript" src="assets/pandemonica.js"></script>
+  <script type="text/javascript" src="assets/zarada.js"></script>
   <script type="text/javascript">
   	var ISKEYPRESSED=false
   	var WHATKEYPRESSED=undefined
@@ -517,12 +529,31 @@
     	// copyareapic(MARIOLITTLE, 10, 10, Math.floor(bgh/2-h/2+2), bgw-w+2, 0, 0, 10, true)
     }
 
+    function mathframes(character) {
+    	frames=[]
+    	a=0
+    	for (let i=0; i<character.nframes; i++) {
+    		frames.push({arearw:0, areacl:a})
+    		a=a+character.w+2
+    	}
+    	return frames
+    }
+
+    function updateframes(character) {  	
+    	character.frame++
+    	if (character.frame == character.delay) {
+    		character.frame=0
+    		character.fri++
+    		character.fri=character.fri%character.nframes
+    	}
+    }
+
+
 
 
     let mariowdth=16
     let mariohght=28
     let framei=0
-    let marioframe=0
     let goleft=false
     let marioarearw=0
     let marioareacl=0
@@ -554,14 +585,18 @@
     	picw:mariopicw, 
     	reversedh:goleft,
     	frames:[{arearw:0,areacl:0}, {arearw:0,areacl:20}, {arearw:0,areacl:40}],
+    	delay:5,
     	fri:0,
+    	frame:0,
+    	nframes:3,
     	name:"mario",
     	maxhealth:20,
     	currenthealth:20,
     	damage:2,
     	mw:2,
     	mh:2,
-    	heal:3
+    	heal:3,
+    	drawcharacter:true
     }, namescharacters)
 
     addcharacer(characters, {
@@ -573,15 +608,44 @@
     	picw:mariopicw, 
     	reversedh:true,
     	frames:[{arearw:0,areacl:0}, {arearw:0,areacl:20}, {arearw:0,areacl:40}],
+    	delay:5,
     	fri:0,
+    	frame:0,
+    	nframes:3,
     	name:"mario2",
     	maxhealth:20,
     	currenthealth:20,
     	damage:2,
     	mw:2,
     	mh:2,
-    	heal:3
+    	heal:3,
+    	drawcharacter:true
     }, namescharacters)
+
+    addcharacer(characters, {
+    	colorlist: PANDEMONICA, 
+    	w:61, 
+    	h:PANDEMONICA_SIZE.height, 
+    	row:10, 
+    	col:10, 
+    	picw:PANDEMONICA_SIZE.width, 
+    	reversedh:false,
+    	frames:undefined,
+    	nframes:10,
+    	delay:3,
+    	fri:0,
+    	frame:0,
+    	name:"pandemonica",
+    	maxhealth:20,
+    	currenthealth:20,
+    	damage:2,
+    	mw:1,
+    	mh:1,
+    	heal:3,
+    	drawcharacter:true
+    }, namescharacters)
+
+    characters["pandemonica"].frames=mathframes(characters["pandemonica"])
 
     let abuttoncolor=white
     let abuttonw=36*2
@@ -641,7 +705,7 @@
     	clear_screen(white)
     	copypic(BGSNOW, BGSNOW_SIZE.width, BGSNOW_SIZE.height, 0, 0)
     	drawtxtbox(BGSNOW_SIZE.height+2, 2, WIDTH/2+11, HEIGHT-BGSNOW_SIZE.height-5, "щмщшккщаущшкау")
-    	drawteams(BGSNOW_SIZE.width, BGSNOW_SIZE.height, 14, 14*4, teams)
+    	// drawteams(BGSNOW_SIZE.width, BGSNOW_SIZE.height, 14, 14*4, teams)
 
     	// console.log(mathtxtw("атака"), "атака ширина")
     	// console.log(mathtxtw("супер атака"), "суператака ширина")
@@ -666,49 +730,6 @@
 		// 	    	mariorw++
 		//     ISKEYPRESSED=false
 		// }
-
-		if (marioframe==15) {
-			marioframe=0
-		}
-
-		// clear_screen(white)
-		if (marioframe>=10) {
-			// marioarearw=0
-			// marioareacl=40
-			// mariopicw=56
-			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			if ("mario" in characters) {
-				characters.mario.fri=2
-			}
-			if ("mario2" in characters) {
-				characters.mario2.fri=2
-			}
-		}
-		else if (marioframe>=5) {
-			// marioarearw=0
-			// marioareacl=20
-			// mariopicw=56
-			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			if ("mario" in characters) {
-				characters.mario.fri=1
-			}
-			if ("mario2" in characters) {
-				characters.mario2.fri=1
-			}
-		}
-		else if (marioframe>=0) {
-			// marioarearw=0
-			// marioareacl=0
-			// mariopicw=56
-			// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, marioarearw, marioareacl, mariopicw, goleft)
-			if ("mario" in characters) {
-				characters.mario.fri=0
-			}
-			if ("mario2" in characters) {
-				characters.mario2.fri=0
-			}
-		}
-
 
 		if (yourturn) {
 			for (let i=0; i<buttons.length; i++) {
@@ -749,8 +770,10 @@
 		// copypic(MARIOCOL, 16, 16, mariorw, mariocl)
 		// copyareapic(MARIOSPRITE, mariowdth, mariohght, mariorw, mariocl, 0, 0, 56)
 		await add_frame()
-		marioframe++
-		framei++
+		for (let i=0; i<namescharacters.length; i++) {
+    		updateframes(characters[namescharacters[i]])
+    	}
+    	framei++
 		if (died)
 			break
     }
